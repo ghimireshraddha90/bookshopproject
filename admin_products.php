@@ -132,9 +132,7 @@ include 'admin_header.php';
       </div>
 
       <?php if(!empty($fetch_products['admin_name'])): ?>
-      <div class="product_admin">
-        Added by: <?php echo $fetch_products['admin_name']; ?>
-      </div>
+      
       <?php endif; ?>
 
       <a href="admin_products.php?update=<?php echo $fetch_products['id']?>" class="product_btn">Update</a>
