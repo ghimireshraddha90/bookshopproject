@@ -11,6 +11,7 @@ if(!isset($admin_id)){
 if(isset($_POST['add_products_btn'])){
   $name = mysqli_real_escape_string($conn, $_POST['name']);
   $price = $_POST['price'];
+  $quantity = $_POST['quantity']; // New quantity field
   $image = $_FILES['image']['name'];
   $image_size = $_FILES['image']['size'];
   $image_tmp_name = $_FILES['image']['tmp_name'];
@@ -21,8 +22,8 @@ if(isset($_POST['add_products_btn'])){
   if(mysqli_num_rows($select_product_name) > 0){
     $message[] = 'The given product is already added';
   } else {
-    // Updated query to include created_by with the admin_id from session
-    $add_product_query = mysqli_query($conn, "INSERT INTO `products`(name, price, image, created_by) VALUES ('$name', '$price', '$image', '$admin_id')") or die('query2 failed');
+    // Updated query to include quantity
+    $add_product_query = mysqli_query($conn, "INSERT INTO `products`(name, price, quantity, image, created_by) VALUES ('$name', '$price', '$quantity', '$image', '$admin_id')") or die('query2 failed');
     
     if($add_product_query){
       if($image_size > 2000000){
@@ -52,9 +53,10 @@ if(isset($_POST['update_product'])){
   $update_p_id = $_POST['update_p_id'];
   $update_name = $_POST['update_name'];
   $update_price = $_POST['update_price'];
+  $update_quantity = $_POST['update_quantity']; // New update quantity field
 
-  // Update product details and set created_by to current admin
-  mysqli_query($conn, "UPDATE `products` SET name='$update_name', price='$update_price', created_by='$admin_id' WHERE id='$update_p_id'") or die('query failed');
+  // Update product details including quantity
+  mysqli_query($conn, "UPDATE `products` SET name='$update_name', price='$update_price', quantity='$update_quantity', created_by='$admin_id' WHERE id='$update_p_id'") or die('query failed');
 
   $update_image = $_FILES['update_image']['name'];
   $update_image_tmp_name = $_FILES['update_image']['tmp_name'];
@@ -100,6 +102,8 @@ include 'admin_header.php';
 
     <input type="number" min="0" name="price" class="admin_input" placeholder="Enter Product Price" required>
 
+    <input type="number" min="0" name="quantity" class="admin_input" placeholder="Enter Product Quantity" required>
+    
     <input type="file" name="image" class="admin_input" accept="image/jpg, image/jpeg, image/png" required>
 
     <input type="submit" name="add_products_btn" class="admin_input" value="Add Product">
@@ -125,6 +129,10 @@ include 'admin_header.php';
 
       <div class="product_name">
       <?php echo $fetch_products['name'];?>
+      </div>
+
+      <div class="product_qty">
+      Stock: <?php echo $fetch_products['quantity'];?> items
       </div>
 
       <div class="product_price">Rs. 
@@ -157,8 +165,9 @@ include 'admin_header.php';
         while($fetch_update = mysqli_fetch_assoc($update_query)){
 
   ?>
-
-  <form action="" method="post" enctype="multipart/form-data">
+<div class="scrollable-form">
+ 
+  <form action="" method="post" enctype="multipart/form-data" >
     <input type="hidden" name="update_p_id" value="<?php echo $fetch_update['id'];?>">
 
     <input type="hidden" name="update_old_img" value="<?php echo $fetch_update['image'];?>">
@@ -170,13 +179,15 @@ include 'admin_header.php';
 
     <input type="number" name="update_price" min="0" value="<?php echo $fetch_update['price'];?>" class="admin_input update_box" required placeholder="Enter Product Price">
 
+    <input type="number" name="update_quantity" min="0" value="<?php echo $fetch_update['quantity'];?>" class="admin_input update_box" required placeholder="Enter Product Quantity">
+
     <input type="file" name="update_image" class="admin_input update_box" accept="image/jpg, image/jpeg, image/png">
 
     <input type="submit" value="update" name="update_product" class="product_btn">
     <input type="reset" value="cancel" id="close_update" class="product_btn product_del_btn">
     
   </form>
-
+  </div>
   <?php
       }
     }

@@ -10,18 +10,25 @@ if (isset($_POST['add_to_cart'])) {
     exit;
   }
 
+  $pro_id = $_POST['product_id']; // Added product ID
   $pro_name = $_POST['product_name'];
   $pro_price = $_POST['product_price'];
   $pro_quantity = $_POST['product_quantity'];
   $pro_image = $_POST['product_image'];
+  $available_quantity = $_POST['available_quantity']; // Added available quantity
 
-  $check = mysqli_query($conn, "SELECT * FROM `cart` WHERE name='$pro_name' AND user_id='$user_id'") or die('query failed');
-
-  if (mysqli_num_rows($check) > 0) {
-    $message[] = 'Already added to cart!';
+  // Check if requested quantity exceeds available stock
+  if ($pro_quantity > $available_quantity) {
+    $message[] = 'Stock unavailable! Only ' . $available_quantity . ' items left.';
   } else {
-    mysqli_query($conn, "INSERT INTO `cart`(user_id, name, price, quantity, image) VALUES ('$user_id','$pro_name','$pro_price','$pro_quantity','$pro_image')") or die('query2 failed');
-    $message[] = 'Product added to cart!';
+    $check = mysqli_query($conn, "SELECT * FROM `cart` WHERE name='$pro_name' AND user_id='$user_id'") or die('query failed');
+
+    if (mysqli_num_rows($check) > 0) {
+      $message[] = 'Already added to cart!';
+    } else {
+      mysqli_query($conn, "INSERT INTO `cart`(user_id, name, price, quantity, image) VALUES ('$user_id','$pro_name','$pro_price','$pro_quantity','$pro_image')") or die('query2 failed');
+      $message[] = 'Product added to cart!';
+    }
   }
 }
 ?>
@@ -69,14 +76,25 @@ if (isset($_POST['add_to_cart'])) {
             <img src="./uploaded_img/<?php echo $fetch_products['image']; ?>" alt="">
             <h3><?php echo $fetch_products['name']; ?></h3>
             <p>Rs. <?php echo $fetch_products['price']; ?>/-</p>
+            
+            <!-- Display available stock -->
+            <div class="stock-info <?php echo ($fetch_products['quantity'] <= 5) ? 'low-stock' : ''; ?>">
+              Available: <?php echo $fetch_products['quantity']; ?> in stock
+            </div>
           
-            <input type="hidden" name="product_name" value="<?php echo $fetch_products['name'] ?>">
-            <input type="number" name="product_quantity" min="1" value="1">
+            <input type="hidden" name="product_id" value="<?php echo $fetch_products['id']; ?>">
+            <input type="hidden" name="product_name" value="<?php echo $fetch_products['name']; ?>">
             <input type="hidden" name="product_price" value="<?php echo $fetch_products['price']; ?>">
             <input type="hidden" name="product_image" value="<?php echo $fetch_products['image']; ?>">
-
-            <input type="submit" value="Add to Cart" name="add_to_cart" class="product_btn">
-
+            <input type="hidden" name="available_quantity" value="<?php echo $fetch_products['quantity']; ?>">
+            
+            <!-- Only show quantity selector and add to cart button if stock is available -->
+            <?php if($fetch_products['quantity'] > 0): ?>
+              <input type="number" name="product_quantity" min="1" max="<?php echo $fetch_products['quantity']; ?>" value="1">
+              <input type="submit" value="Add to Cart" name="add_to_cart" class="product_btn">
+            <?php else: ?>
+              <div class="out-of-stock">Out of Stock</div>
+            <?php endif; ?>
           </form>
 
       <?php
@@ -112,6 +130,25 @@ if (isset($_POST['add_to_cart'])) {
   <script src="https://kit.fontawesome.com/eedbcd0c96.js" crossorigin="anonymous"></script>
 
   <script src="script.js"></script>
+
+  <script>
+    // Optional JavaScript to validate quantity before form submission
+    document.addEventListener('DOMContentLoaded', function() {
+      const forms = document.querySelectorAll('.pro_box');
+      
+      forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+          const quantityInput = this.querySelector('input[name="product_quantity"]');
+          const availableQuantity = parseInt(this.querySelector('input[name="available_quantity"]').value);
+          
+          if(parseInt(quantityInput.value) > availableQuantity) {
+            e.preventDefault();
+            alert('Sorry, only ' + availableQuantity + ' items are available in stock.');
+          }
+        });
+      });
+    });
+  </script>
 
 </body>
 

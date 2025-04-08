@@ -15,13 +15,23 @@ if (isset($_POST['add_to_cart'])) {
   $pro_quantity = $_POST['product_quantity'];
   $pro_image = $_POST['product_image'];
 
-  $check = mysqli_query($conn, "SELECT * FROM `cart` WHERE name='$pro_name' AND user_id='$user_id'") or die('query failed');
+  // Check product stock
+  $stock_check = mysqli_query($conn, "SELECT quantity FROM `products` WHERE name='$pro_name'") or die('query failed');
+  $product_data = mysqli_fetch_assoc($stock_check);
+  $available_qty = $product_data['quantity'];
 
-  if (mysqli_num_rows($check) > 0) {
-    $message[] = 'Already added to cart!';
+  if ($pro_quantity > $available_qty) {
+    $message[] = 'Requested quantity exceeds available stock!';
   } else {
-    mysqli_query($conn, "INSERT INTO `cart`(user_id, name, price, quantity, image) VALUES ('$user_id', '$pro_name', '$pro_price', '$pro_quantity', '$pro_image')") or die('query2 failed');
-    $message[] = 'Product added to cart!';
+    // Check if product already in cart
+    $check = mysqli_query($conn, "SELECT * FROM `cart` WHERE name='$pro_name' AND user_id='$user_id'") or die('query failed');
+
+    if (mysqli_num_rows($check) > 0) {
+      $message[] = 'Product already in cart!';
+    } else {
+      mysqli_query($conn, "INSERT INTO `cart`(user_id, name, price, quantity, image) VALUES ('$user_id', '$pro_name', '$pro_price', '$pro_quantity', '$pro_image')") or die('query2 failed');
+      $message[] = 'Product added to cart!';
+    }
   }
 }
 ?>
@@ -55,15 +65,24 @@ if (isset($_POST['add_to_cart'])) {
           <h3><?php echo $fetch_products['name']; ?></h3>
           <p>Rs. <?php echo $fetch_products['price']; ?>/-</p>
 
+          <div class="stock-info <?php echo ($fetch_products['quantity'] <= 5) ? 'low-stock' : ''; ?>">
+              Available: <?php echo $fetch_products['quantity']; ?> in stock
+            </div>
+          
+
           <input type="hidden" name="product_name" value="<?php echo $fetch_products['name']; ?>">
-          <input type="number" name="product_quantity" min="1" value="1">
+          <input type="number" name="product_quantity" min="1" max="<?php echo $fetch_products['quantity']; ?>" value="1" required>
           <input type="hidden" name="product_price" value="<?php echo $fetch_products['price']; ?>">
           <input type="hidden" name="product_image" value="<?php echo $fetch_products['image']; ?>">
 
-          <?php if ($user_id): ?>
-            <input type="submit" value="Add to Cart" name="add_to_cart" class="product_btn">
+          <?php if ($fetch_products['quantity'] > 0): ?>
+            <?php if ($user_id): ?>
+              <input type="submit" value="Add to Cart" name="add_to_cart" class="product_btn">
+            <?php else: ?>
+              <a href="login.php" class="product_btn">Login to Add</a>
+            <?php endif; ?>
           <?php else: ?>
-            <a href="login.php" class="product_btn">Login to Add</a>
+            <p class="out_of_stock">Out of Stock</p>
           <?php endif; ?>
         </form>
     <?php

@@ -103,14 +103,16 @@
     background-color: white;
     padding: 1.5rem;
     width: 25%;
-    height: 450px;
+    height: 480px;
+    /* Slightly increased height to accommodate quantity field */
     border-radius: 30px;
     text-align: center;
     box-shadow: 2px 2px 15px gray;
 }
 
 .show_products .product_box_cont .product_box img {
-    height: 60%;
+    height: 55%;
+    /* Slightly reduced to make room for quantity */
     border-radius: 20px;
 }
 
@@ -118,14 +120,30 @@
     font-size: 1.5rem;
     font-weight: 900;
     letter-spacing: 1px;
+    margin-top: 0.5rem;
 }
 
 .show_products .product_box_cont .product_box .product_price {
     font-size: 1.3rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     color: gray;
 }
 
+.show_products .product_box_cont .product_box .product_qty {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    color: #4a7c59;
+    /* Green color for stock display */
+    font-weight: 600;
+}
+
+/* Added styling for the "added by" info */
+.show_products .product_box_cont .product_box .added_by {
+    font-size: 0.9rem;
+    color: #777;
+    margin-bottom: 0.8rem;
+    font-style: italic;
+}
 
 .edit_product_form {
     background-color: rgb(0, 0, 0, .7);
@@ -242,4 +260,35 @@
     display: flex;
     font-size: 1rem;
     justify-content: center;
+}
+
+/* Product buttons styling */
+.product_btn {
+    padding: 0.5rem 1rem;
+    margin: 0.3rem;
+    border-radius: 5px;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: 600;
+    cursor: pointer;
+    background-color: #3a86ff;
+    color: white;
+    border: none;
+}
+
+.product_del_btn {
+    background-color: #C1121F;
+}
+
+.scrollable-form {
+    max-height: 600px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-style: groove;
+    background-color: white;
+    padding: 2rem;
+    border-radius: 25px;
+    box-shadow: 2px 2px 10px gray;
+    display: flex;
+    flex-direction: column;
 }
