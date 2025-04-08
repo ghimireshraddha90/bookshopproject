@@ -2,44 +2,46 @@
 include 'config.php';
 session_start();
 
-$admin_id=$_SESSION['admin_id'];
+$admin_id = $_SESSION['admin_id'];
 
 if(!isset($admin_id)){
   header('location:login.php');
 };
 
 if(isset($_POST['add_products_btn'])){
-  $name=mysqli_real_escape_string($conn, $_POST['name']);
-  $price=$_POST['price'];
-  $image=$_FILES['image']['name'];
-  $image_size=$_FILES['image']['size'];
-  $image_tmp_name=$_FILES['image']['tmp_name'];
-  $image_folder="uploaded_img/".$image;
+  $name = mysqli_real_escape_string($conn, $_POST['name']);
+  $price = $_POST['price'];
+  $image = $_FILES['image']['name'];
+  $image_size = $_FILES['image']['size'];
+  $image_tmp_name = $_FILES['image']['tmp_name'];
+  $image_folder = "uploaded_img/".$image;
 
-  $select_product_name=mysqli_query($conn, "SELECT name FROM `products` WHERE name='$name'") or die('query failed');
+  $select_product_name = mysqli_query($conn, "SELECT name FROM `products` WHERE name='$name'") or die('query failed');
 
-  if(mysqli_num_rows($select_product_name)>0){
-    $message[]='The given product is already added';
-  }else{
-    $add_product_query=mysqli_query($conn,"INSERT INTO `products`(name,price,image) VALUES ('$name','$price','$image')") or die('query2 failed');
+  if(mysqli_num_rows($select_product_name) > 0){
+    $message[] = 'The given product is already added';
+  } else {
+    // Updated query to include created_by with the admin_id from session
+    $add_product_query = mysqli_query($conn, "INSERT INTO `products`(name, price, image, created_by) VALUES ('$name', '$price', '$image', '$admin_id')") or die('query2 failed');
+    
     if($add_product_query){
-      if($image_size>2000000){
-        $message[]='Image size is too large';
-      }else{
-        move_uploaded_file($image_tmp_name,$image_folder);
-        $message[]="Product added successfully!";
+      if($image_size > 2000000){
+        $message[] = 'Image size is too large';
+      } else {
+        move_uploaded_file($image_tmp_name, $image_folder);
+        $message[] = "Product added successfully!";
       }
-    }else{
-      $message[]="Product failed to be added!";
+    } else {
+      $message[] = "Product failed to be added!";
     }
   }
 };
 
 if(isset($_GET['delete'])){
-  $delete_id=$_GET['delete'];
+  $delete_id = $_GET['delete'];
 
-  $delete_img_query=mysqli_query($conn,"SELECT image from `products` WHERE id='$delete_id'") or die('query failed');
-  $fetch_del_img=mysqli_fetch_assoc($delete_img_query);
+  $delete_img_query = mysqli_query($conn, "SELECT image from `products` WHERE id='$delete_id'") or die('query failed');
+  $fetch_del_img = mysqli_fetch_assoc($delete_img_query);
   unlink('./uploaded_img/'.$fetch_del_img);
 
   mysqli_query($conn, "DELETE FROM `products` WHERE id='$delete_id'") or die('query failed');
@@ -47,27 +49,28 @@ if(isset($_GET['delete'])){
 }
 
 if(isset($_POST['update_product'])){
-  $update_p_id=$_POST['update_p_id'];
-  $update_name=$_POST['update_name'];
-  $update_price=$_POST['update_price'];
+  $update_p_id = $_POST['update_p_id'];
+  $update_name = $_POST['update_name'];
+  $update_price = $_POST['update_price'];
 
-  mysqli_query($conn,"UPDATE `products` SET name='$update_name', price='$update_price' WHERE id='$update_p_id'") or die('query failed');
+  // Update product details and set created_by to current admin
+  mysqli_query($conn, "UPDATE `products` SET name='$update_name', price='$update_price', created_by='$admin_id' WHERE id='$update_p_id'") or die('query failed');
 
-  $update_image=$_FILES['update_image']['name'];
-  $update_image_tmp_name=$_FILES['update_image']['tmp_name'];
-  $update_image_size=$_FILES['update_image']['size'];
-  $update_folder='./uploaded_img/'.$update_image;
-  $old_image=$_POST['update_old_img'];
+  $update_image = $_FILES['update_image']['name'];
+  $update_image_tmp_name = $_FILES['update_image']['tmp_name'];
+  $update_image_size = $_FILES['update_image']['size'];
+  $update_folder = './uploaded_img/'.$update_image;
+  $old_image = $_POST['update_old_img'];
   if(!empty($update_image)){
-    if($update_image_size>2000000){
-      $message[]='Image size is too large';
-    }else{
-      mysqli_query($conn,"UPDATE `products` SET image='$update_image' WHERE id='$update_p_id'") or die('query failed');
+    if($update_image_size > 2000000){
+      $message[] = 'Image size is too large';
+    } else {
+      mysqli_query($conn, "UPDATE `products` SET image='$update_image' WHERE id='$update_p_id'") or die('query failed');
 
-      move_uploaded_file($update_image_tmp_name,$update_folder);
+      move_uploaded_file($update_image_tmp_name, $update_folder);
       unlink('./uploaded_img/'.$old_image);
 
-      $message[]="Product added successfully!";
+      $message[] = "Product updated successfully!";
     }
   }
   header('location:admin_products.php');
@@ -107,10 +110,13 @@ include 'admin_header.php';
 <section class="show_products">
   <div class="product_box_cont">
     <?php
-      $select_products=mysqli_query($conn, "SELECT * FROM `products`") or die('query failed');
+      // Updated query to join with register table to get admin name
+      $select_products = mysqli_query($conn, "SELECT p.*, r.name as admin_name 
+                                            FROM `products` p 
+                                            LEFT JOIN `register` r ON p.created_by = r.id") or die('query failed');
 
-      if(mysqli_num_rows($select_products)>0){
-        while($fetch_products=mysqli_fetch_assoc($select_products)){
+      if(mysqli_num_rows($select_products) > 0){
+        while($fetch_products = mysqli_fetch_assoc($select_products)){
 
     ?>
 
@@ -124,6 +130,12 @@ include 'admin_header.php';
       <div class="product_price">Rs. 
       <?php echo $fetch_products['price'];?> /-
       </div>
+
+      <?php if(!empty($fetch_products['admin_name'])): ?>
+      <div class="product_admin">
+        Added by: <?php echo $fetch_products['admin_name']; ?>
+      </div>
+      <?php endif; ?>
 
       <a href="admin_products.php?update=<?php echo $fetch_products['id']?>" class="product_btn">Update</a>
 
@@ -141,10 +153,10 @@ include 'admin_header.php';
 <section class="edit_product_form">
   <?php
     if(isset($_GET['update'])){
-      $update_id=$_GET['update'];
-      $update_query=mysqli_query($conn,"SELECT * FROM `products` WHERE id='$update_id'") or die('query failed');
-      if(mysqli_num_rows($update_query)>0){
-        while($fetch_update=mysqli_fetch_assoc($update_query)){
+      $update_id = $_GET['update'];
+      $update_query = mysqli_query($conn, "SELECT * FROM `products` WHERE id='$update_id'") or die('query failed');
+      if(mysqli_num_rows($update_query) > 0){
+        while($fetch_update = mysqli_fetch_assoc($update_query)){
 
   ?>
 
@@ -160,7 +172,7 @@ include 'admin_header.php';
 
     <input type="number" name="update_price" min="0" value="<?php echo $fetch_update['price'];?>" class="admin_input update_box" required placeholder="Enter Product Price">
 
-    <input type="file" name="update_image" value="<?php echo $fetch_update['price'];?>" class="admin_input update_box" accept="image/jpg, image/jpeg, image/png">
+    <input type="file" name="update_image" class="admin_input update_box" accept="image/jpg, image/jpeg, image/png">
 
     <input type="submit" value="update" name="update_product" class="product_btn">
     <input type="reset" value="cancel" id="close_update" class="product_btn product_del_btn">
