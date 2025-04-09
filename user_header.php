@@ -24,7 +24,7 @@
         <a href="contact.php">Contact</a>
         <a href="orders.php">Orders</a>
       </nav>
-        
+
       <div class="last_part">
         <div class="loginorreg">
           <p>New <a href="login.php">Login</a> | <a href="register.php">Register</a></p>
@@ -61,4 +61,3 @@
     </div>
   </div>
 </header>
-
