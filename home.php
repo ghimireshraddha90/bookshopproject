@@ -53,7 +53,9 @@ if (isset($_POST['add_to_cart'])) {
 
   <?php
   include 'user_header.php';
+
   ?>
+
 
   <section class="home_cont">
     <div class="main_descrip">
@@ -76,20 +78,20 @@ if (isset($_POST['add_to_cart'])) {
             <img src="./uploaded_img/<?php echo $fetch_products['image']; ?>" alt="">
             <h3><?php echo $fetch_products['name']; ?></h3>
             <p>Rs. <?php echo $fetch_products['price']; ?>/-</p>
-            
+
             <!-- Display available stock -->
             <div class="stock-info <?php echo ($fetch_products['quantity'] <= 5) ? 'low-stock' : ''; ?>">
               Available: <?php echo $fetch_products['quantity']; ?> in stock
             </div>
-          
+
             <input type="hidden" name="product_id" value="<?php echo $fetch_products['id']; ?>">
             <input type="hidden" name="product_name" value="<?php echo $fetch_products['name']; ?>">
             <input type="hidden" name="product_price" value="<?php echo $fetch_products['price']; ?>">
             <input type="hidden" name="product_image" value="<?php echo $fetch_products['image']; ?>">
             <input type="hidden" name="available_quantity" value="<?php echo $fetch_products['quantity']; ?>">
-            
+
             <!-- Only show quantity selector and add to cart button if stock is available -->
-            <?php if($fetch_products['quantity'] > 0): ?>
+            <?php if ($fetch_products['quantity'] > 0): ?>
               <input type="number" name="product_quantity" min="1" max="<?php echo $fetch_products['quantity']; ?>" value="1">
               <input type="submit" value="Add to Cart" name="add_to_cart" class="product_btn">
             <?php else: ?>
@@ -111,18 +113,18 @@ if (isset($_POST['add_to_cart'])) {
     <div class="about_descript">
       <h2>Discover Our Story</h2>
       <p>At Bookshop, we are passionate about connecting readers with captivating stories, inspiring ideas, and a world of knowledge. Our bookstore is more than just a place to buy books; it's a haven for book enthusiasts, where the love for literature thrives.
-    </p>
-    <button class="product_btn" onclick="window.location.href='about.php';">Read More</button>
+      </p>
+      <button class="product_btn" onclick="window.location.href='about.php';">Read More</button>
     </div>
   </section>
 
   <section class="questions_cont">
     <div class="questions">
-    <h2>Have Any Queries?</h2>
-    <p>At Bookshop, we value your satisfaction and strive to provide exceptional customer service. If you have any questions, concerns, or inquiries, our dedicated team is here to assist you every step of the way.</p>
-    <button class="product_btn" onclick="window.location.href='contact.php';">Contact Us</button>
+      <h2>Have Any Queries?</h2>
+      <p>At Bookshop, we value your satisfaction and strive to provide exceptional customer service. If you have any questions, concerns, or inquiries, our dedicated team is here to assist you every step of the way.</p>
+      <button class="product_btn" onclick="window.location.href='contact.php';">Contact Us</button>
     </div>
-    
+
   </section>
   <?php
   include 'footer.php';
@@ -135,13 +137,13 @@ if (isset($_POST['add_to_cart'])) {
     // Optional JavaScript to validate quantity before form submission
     document.addEventListener('DOMContentLoaded', function() {
       const forms = document.querySelectorAll('.pro_box');
-      
+
       forms.forEach(form => {
         form.addEventListener('submit', function(e) {
           const quantityInput = this.querySelector('input[name="product_quantity"]');
           const availableQuantity = parseInt(this.querySelector('input[name="available_quantity"]').value);
-          
-          if(parseInt(quantityInput.value) > availableQuantity) {
+
+          if (parseInt(quantityInput.value) > availableQuantity) {
             e.preventDefault();
             alert('Sorry, only ' + availableQuantity + ' items are available in stock.');
           }

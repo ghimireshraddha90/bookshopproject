@@ -27,7 +27,7 @@
 
       <div class="last_part">
         <div class="loginorreg">
-          <p>New <a href="login.php">Login</a> | <a href="register.php">Register</a></p>
+          <p><a href="login.php">New Login</a> | <a href="register.php">Register</a></p>
         </div>
 
         <div class="icons">

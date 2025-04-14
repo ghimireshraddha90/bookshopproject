@@ -12,7 +12,8 @@ if(isset($_POST['submit'])){
 
     $select_users=mysqli_query($conn,"SELECT * FROM `register` WHERE email='$email' AND password='$password'") or die('query failed');
 
-    if(mysqli_num_rows($select_users) > 0){
+    
+    if(mysqli_num_rows($select_users) > 0 ){
         $message[]='User already exists!';
     }else{
         if($password!=$cpassword){
